@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Ajax处理</title>
+<script type="text/javascript">
+	var xmlHttpRequest ;	// 这个是Ajax的核心处理对象，所有的异步处理操作都通过此对象完成
+	function create() {	// 定义一个函数，此函数负责创建XMLHttpRequst对象实例
+		if (window.XMLHttpRequest) {	// 当前浏览器使用的不是IE
+			xmlHttpRequest = new XMLHttpRequest() ;	// 直接实例化对象
+		} else {	// 使用的是IE浏览器
+			xmlHttpRequest = new ActiveXObject("Microsoft.XMLHttp") ;
+		}
+	}
+	window.onload = function() {
+		document.getElementById("sendBut").addEventListener("click",function(){
+			info = document.getElementById("info").value ;
+			if (info != "") {	// 表示现在有数据，则进行数据的发送
+				create() ;	// 创建XMLHttpRequest对象
+				// 定义要进行处理的程序路径
+				xmlHttpRequest.open("post","EchoServlet?msg=" + info) ;
+				// 进行请求的发送处理
+				xmlHttpRequest.send(null) ;	// 此时参数通过地址重写传递了
+				xmlHttpRequest.onreadystatechange = function() {	// 定义信息返回的回调处理函数
+					if (xmlHttpRequest.readyState == 2 || xmlHttpRequest.readyState == 3) {
+						console.log("----- 正在处理 ------") ;
+					}
+					if (xmlHttpRequest.readyState == 4 && xmlHttpRequest.status == 200) {
+						console.log("处理成功status = " + xmlHttpRequest.status + "、readyState = " + xmlHttpRequest.readyState + "、text = " + xmlHttpRequest.responseText) ;
+						pElement = document.createElement("p") ;
+						pElement.appendChild(document.createTextNode(xmlHttpRequest.responseText)) ;
+						document.getElementById("infoDiv").appendChild(pElement) ;
+					}
+					document.getElementById("info").value = "" ;
+				}
+			}
+		},false) ;
+	}
+</script>
+</head>
+<body>
+<div id="inputDiv">
+	<input type="text" name="info" id="info">
+	<button id="sendBut">发送</button>
+</div>
+<div id="infoDiv"></div>
+</body>
+</html>

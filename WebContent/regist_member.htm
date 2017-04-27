@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Ajax处理</title>
+<script type="text/javascript">
+	midCheckFlag = false ;
+	var xmlHttpRequest ;	// 这个是Ajax的核心处理对象，所有的异步处理操作都通过此对象完成
+	function create() {	// 定义一个函数，此函数负责创建XMLHttpRequst对象实例
+		if (window.XMLHttpRequest) {	// 当前浏览器使用的不是IE
+			xmlHttpRequest = new XMLHttpRequest() ;	// 直接实例化对象
+		} else {	// 使用的是IE浏览器
+			xmlHttpRequest = new ActiveXObject("Microsoft.XMLHttp") ;
+		}
+	}
+	window.onload = function() {
+		document.getElementById("mid").addEventListener("blur",validateMid,false) ;
+		document.getElementById("password").addEventListener("blur",validatePassword,false) ;
+		document.getElementById("myForm").addEventListener("submit",function(e){
+			if (midCheckFlag & validatePassword()) {
+				this.submit() ; 
+			} else {
+				e.preventDefault() ;
+			}
+		},false) ;
+	}
+	function validateMid() {
+		mid = document.getElementById("mid").value ;
+		midSpan = document.getElementById("midSpan") ;
+		if (mid == "") {
+			midSpan.innerHTML = "<font color='red'>用户名不允许为空！</font>" ;
+			midCheckFlag = false ;
+		} else {	// 此处表示用户名不为空，不为空，应该进行ajax异步验证
+			create() ;
+			xmlHttpRequest.open("post","MemberServlet?mid=" + mid) ;
+			xmlHttpRequest.send(null) ;
+			xmlHttpRequest.onreadystatechange = function() {
+				if (xmlHttpRequest.readyState == 4 && xmlHttpRequest.status == 200) {
+					if (xmlHttpRequest.responseText.trim() == "true") {
+						midSpan.innerHTML = "<font color='green'>用户名输入正确！</font>" ;
+						midCheckFlag = true ;
+					} else {
+						midSpan.innerHTML = "<font color='red'>用户名重复！</font>" ;
+						midCheckFlag = false ;
+					}
+				}
+			}
+		}
+	}
+	function validatePassword() {
+		password = document.getElementById("password").value ;
+		passwordSpan = document.getElementById("passwordSpan") ;
+		if (password == "") {
+			passwordSpan.innerHTML = "<font color='red'>密码不允许为空！</font>" ;
+			return false ;
+		} else {
+			passwordSpan.innerHTML = "<font color='green'>密码输入正确！</font>" ;
+			return true ;
+		}
+	}
+</script>
+</head>
+<body>
+<div id="inputDiv">
+	<form action="regist_do.jsp" method="post" id="myForm">
+		用户名：<input type="text" name="mid" id="mid"><span id="midSpan"></span><br>
+		密&nbsp;码：<input type="password" name="password" id="password"><span id="passwordSpan"></span><br>
+		<input type="submit" value="注册">
+	</form>
+</div>
+</body>
+</html>
